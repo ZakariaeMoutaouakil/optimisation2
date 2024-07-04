@@ -1,16 +1,12 @@
-from decimal import Decimal
-from math import factorial, exp
 from time import time
 
-from scipy.special import gammaincc
+from mpmath import mp, mpf, factorial, exp, gammainc
 
 from new.convolve_pmfs import convolve_pmfs
 from new.debug_log import debug_log
 from new.multinomial_max_cdf import multinomial_max_cdf
 from new.multinomial_max_cdf_simulation import multinomial_max_cdf_simulation
 from new.truncated_poisson_pmf import truncated_poisson_pmf
-
-
 
 
 def my_max_cdf(q: float, n: int, a: int, s: float, debug: bool = False) -> float:
@@ -20,32 +16,41 @@ def my_max_cdf(q: float, n: int, a: int, s: float, debug: bool = False) -> float
     assert n <= 2 * a, "n must be less than or equal to 2a"
     assert s > 0, "s must be positive"
 
-    first_factor = Decimal(factorial(n)) / (Decimal(s ** n) * Decimal(exp(-s)))
+    # Set the precision
+    mp.dps = 50
+
+    first_factor = factorial(n) / (mpf(s) ** n * exp(-s))
     debug_log(f"first factor: {first_factor}", debug)
-    second_factor = gammaincc(a + 1, s * q)
+
+    second_factor = gammainc(a + 1, s * q, regularized=True)
     debug_log(f"second factor: {second_factor}", debug)
-    third_factor = gammaincc(a + 1, s * (1 - q))
+
+    third_factor = gammainc(a + 1, s * (1 - q), regularized=True)
     debug_log(f"third factor: {third_factor}", debug)
 
-    pmf1 = truncated_poisson_pmf(lam=s * q, b=a)
+    pmf1 = truncated_poisson_pmf(lam=s * q, b=a, precision=50)
     debug_log(f"pmf1: {pmf1}", debug)
-    pmf2 = truncated_poisson_pmf(lam=s * (1 - q), b=a)
+
+    pmf2 = truncated_poisson_pmf(lam=s * (1 - q), b=a, precision=50)
     debug_log(f"pmf2: {pmf2}", debug)
+
     sum_pmf = convolve_pmfs(pmf1, pmf2)
     debug_log(f"sum_pmf: {sum_pmf}", debug)
-    final_factor = sum_pmf.get(n, 0)
+
+    final_factor = sum_pmf.get(n, mpf(0))
     debug_log(f"final factor: {final_factor}", debug)
 
-    return float(first_factor * Decimal(second_factor) * Decimal(third_factor) * Decimal(final_factor))
+    result = first_factor * second_factor * third_factor * final_factor
+    return float(result)
 
 
 def main():
     q = 0.95
-    n = 177 # limit 177
+    n = 300  # limit 177
     s = 1
-    a = 170
+    a = 290
     start_time = time()
-    result = my_max_cdf(q=q, n=n, s=s, a=a, debug=True)
+    result = my_max_cdf(q=q, n=n, s=s, a=a, debug=False)
     end_time = time()
     print("My Max CDF:", result)
     print("Time taken:", end_time - start_time)
@@ -58,11 +63,11 @@ def main():
     print("Multinomial Max CDF Simulation:", result)
     print("Time taken:", end_time - start_time)
 
-    # start_time = time()
-    # result = multinomial_max_cdf(x=a, n=n, p=p)
-    # end_time = time()
-    # print("My Max CDF:", result)
-    # print("Time taken:", end_time - start_time)
+    start_time = time()
+    result = multinomial_max_cdf(x=a, n=n, p=p)
+    end_time = time()
+    print("My Max CDF:", result)
+    print("Time taken:", end_time - start_time)
 
 
 if __name__ == "__main__":
