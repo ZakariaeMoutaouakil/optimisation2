@@ -44,7 +44,7 @@ def main():
     n = 1000
     m = 10
     alpha = 0.001
-    x = 140  # Target quantile value
+    x = 990  # Target quantile value
     num_simulations = 2000000
 
     start_time = time()
