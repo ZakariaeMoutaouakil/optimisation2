@@ -12,6 +12,7 @@ def calculate_bounds(matrix: ndarray, shift: Callable[[ndarray, float], float], 
     upper_bounds = zeros(num_columns)
     lower_bounds = zeros(num_columns)
     means = column_means(matrix)
+
     for i in range(num_columns):
         vector = matrix[:, i]
         if debug:
