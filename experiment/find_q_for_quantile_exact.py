@@ -2,11 +2,12 @@ from time import time
 
 from statsmodels.stats.proportion import proportion_confint
 
-from experiment.find_quantile import find_quantile
+from experiment.find_quantile_exact import find_quantile_exact
 from multinomial.generate_tuple import generate_tuple
 
 
-def find_q_for_quantile(n: int, m: int, alpha: float, x: int, num_simulations: int, tolerance: float = 1e-5) -> float:
+def find_q_for_quantile_exact(n: int, m: int, alpha: float, x: int, num_simulations: int,
+                              tolerance: float = 1e-5) -> float:
     """
     Find the value of q such that the quantile is strictly less than x.
 
@@ -29,7 +30,7 @@ def find_q_for_quantile(n: int, m: int, alpha: float, x: int, num_simulations: i
         # print(f"Lower bound: {lower_bound}, Upper bound: {upper_bound}")
         mid_point = (lower_bound + upper_bound) / 2
         p = generate_tuple(m=m, q=mid_point)
-        quantile_value = find_quantile(p=p, n=n, alpha=alpha, num_simulations=num_simulations)
+        quantile_value = find_quantile_exact(p=p, n=n, alpha=alpha, num_simulations=num_simulations)
 
         if quantile_value < x:
             lower_bound = mid_point
@@ -41,14 +42,14 @@ def find_q_for_quantile(n: int, m: int, alpha: float, x: int, num_simulations: i
 
 def main():
     # Example usage
-    n = 500
-    m = 10
+    n = 50
+    m = 3
     alpha = 0.001
-    x = 121  # Target quantile value
-    num_simulations = 2000000
+    x = 40  # Target quantile value
+    num_simulations = 100000
 
     start_time = time()
-    q_value = find_q_for_quantile(n=n, m=m, alpha=alpha, x=x, num_simulations=num_simulations)
+    q_value = find_q_for_quantile_exact(n=n, m=m, alpha=alpha, x=x, num_simulations=num_simulations)
     end_time = time()
 
     cp = proportion_confint(x, n, alpha=2 * alpha, method="beta")[0]

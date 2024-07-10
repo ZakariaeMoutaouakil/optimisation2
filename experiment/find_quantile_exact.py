@@ -29,7 +29,7 @@ def multinomial_max_simulation(p: Tuple[float, ...], n: int, num_simulations: in
     return max_values
 
 
-def find_quantile(p: Tuple[float, ...], n: int, alpha: float, num_simulations: int) -> int:
+def find_quantile_exact(p: Tuple[float, ...], n: int, alpha: float, num_simulations: int) -> int:
     """
     Find the quantile value x such that the CDF is greater than 1 - alpha using simulation.
 
@@ -47,19 +47,24 @@ def find_quantile(p: Tuple[float, ...], n: int, alpha: float, num_simulations: i
 
     # Calculate the quantile
     quantile_value = percentile(max_values, (1 - alpha) * 100)
+    result = int(quantile_value) - 1
 
-    return int(quantile_value)
+    while True:
+        if multinomial_max_cdf(x=result, n=n, p=p) > 1 - alpha:
+            return result
+        else:
+            result += 1
 
 
 def main():
     # Example usage
     alpha = 0.01
     n = 200
-    p = (0.4, 0.1, 0.5)
+    p = (0.2, 0.3, 0.5)
     num_simulations = 100000
 
     start_time = time()
-    x_value = find_quantile(p=p, n=n, alpha=alpha, num_simulations=num_simulations)
+    x_value = find_quantile_exact(p=p, n=n, alpha=alpha, num_simulations=num_simulations)
     end_time = time()
 
     probability = multinomial_max_cdf(x=x_value, n=n, p=p)
