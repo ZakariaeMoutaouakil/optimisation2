@@ -1,15 +1,18 @@
 from typing import Dict, Tuple
 
-from numpy import prod, array, ndarray
+from mpmath import mp
+from numpy import array, ndarray
 
 
-def create_column_product_dict(y: ndarray) -> Dict[Tuple[int, ...], float]:
+def create_column_product_dict(y: ndarray, precision: int = 50) -> Dict[Tuple[int, ...], mp.mpf]:
+    mp.dps = precision  # Set decimal precision
     k = y.shape[1]
-    result: Dict[Tuple[int, ...], float] = {}
+    result: Dict[Tuple[int, ...], mp.mpf] = {}
 
     for j in range(k):
         e_j = tuple(1 if i == j else 0 for i in range(k))
-        result[e_j] = prod(y[:, j])
+        # Use mpmath's fprod for high-precision product calculation
+        result[e_j] = mp.fprod(y[:, j])
 
     return result
 
@@ -21,11 +24,11 @@ def main():
                [7, 8, 9]])
 
     # Call the function with the sample array
-    result_dict = create_column_product_dict(y)
+    result_dict = create_column_product_dict(y, precision=50)
 
     # Print the resulting dictionary
     for key, value in result_dict.items():
-        print(f"e_{list(key).index(1)}: {key} -> {value}")
+        print(f"e{list(key).index(1)}: {key} -> {value}")
 
 
 # Example usage

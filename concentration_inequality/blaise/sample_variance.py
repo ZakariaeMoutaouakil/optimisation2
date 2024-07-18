@@ -29,7 +29,7 @@ def sample_variance(vector: ndarray) -> float:
 
 def main():
     # Example usage
-    vector = array([1, 2, 3, 4, 5])
+    vector = array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
     # Calculate the sample variance
     variance = sample_variance(vector)

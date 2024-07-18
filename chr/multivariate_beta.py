@@ -1,20 +1,25 @@
 from typing import Tuple
 
-from numpy import prod, sum
-from scipy.special import gamma
+from mpmath import mp, gamma
 
 
-def multivariate_beta(alpha: Tuple[float, ...]) -> float:
-    numerator = prod([gamma(a) for a in alpha])
-    denominator = gamma(sum(alpha))
-    return numerator / denominator
+def multivariate_beta(alpha: Tuple[float, ...], precision: int = 50) -> mp.mpf:
+    # Set the precision
+    mp.dps = precision
+
+    numerator = mp.mpf(1.)
+    denominator = mp.mpf(0.)
+    for a in alpha:
+        numerator *= gamma(a)
+        denominator += a
+    return numerator / gamma(denominator)
 
 
 def main():
-    # Example usage
-    alpha: Tuple[float, ...] = (1.0, 2.0, 3.0)
-    result = multivariate_beta(alpha)
-    print(f"Multivariate Beta{alpha} = {result}")
+    # Calculate multivariate beta function with default precision
+    result = multivariate_beta((1, 2, 3))
+
+    print(result)
 
 
 if __name__ == "__main__":

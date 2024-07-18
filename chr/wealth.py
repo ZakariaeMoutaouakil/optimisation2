@@ -1,6 +1,6 @@
-from math import prod
 from typing import Dict, Tuple
 
+from mpmath import mp
 from numpy import array, ndarray
 
 from chr.create_column_product_dict import create_column_product_dict
@@ -9,17 +9,25 @@ from chr.update_y import update_y
 from concentration_inequality.dirichlet_sample import dirichlet_sample
 
 
-def wealth(y: Dict[Tuple[int, ...], float], o: ndarray) -> float:
-    alpha = tuple(1 / 2 for _ in o)
+def wealth(y: Dict[Tuple[int, ...], mp.mpf], o: ndarray, precision: int = 50) -> mp.mpf:
+    mp.dps = precision  # Set decimal precision
+    alpha = tuple(mp.mpf(1) / 2 for _ in o)  # Use mpmath for division
     denominator = multivariate_beta(alpha)
 
-    numerator = 0.
+    numerator = mp.mpf(0.)
     for k, y_k in y.items():
-        o_k = prod(o[i] ** k[i] for i in range(len(k)))
+        o_k = mp.fprod(o[i] ** k[i] for i in range(len(k)))  # High-precision product
         beta = multivariate_beta(tuple(k[i] + alpha[i] for i in range(len(k))))
         numerator += y_k * o_k * beta
 
     return numerator / denominator
+
+
+def wealth_inverse(y: Dict[Tuple[int, ...], mp.mpf], o: ndarray, precision: int = 50) -> float:
+    # Inverting all coordinates of o
+    o_inverse = mp.matrix([mp.mpf(1) / o_i for o_i in o])
+    # Call wealth function with the inverted o
+    return wealth(y, o_inverse, precision)
 
 
 def main():

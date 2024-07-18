@@ -2,10 +2,9 @@ from math import log, sqrt
 from random import random
 from time import sleep
 
-from numpy import ndarray
+from numpy import ndarray, var
 
 from concentration_inequality.generate_probability_matrix import generate_probability_matrix
-from concentration_inequality.blaise.sample_variance import sample_variance
 
 
 def calculate_term(vector: ndarray, alpha: float) -> float:
@@ -25,7 +24,8 @@ def calculate_term(vector: ndarray, alpha: float) -> float:
     if alpha <= 0 or alpha >= 1:
         raise ValueError("Alpha should be strictly between 0 and 1.")
 
-    variance = sample_variance(vector)
+    # variance = sample_variance(vector)
+    variance = var(vector, ddof=1)
     log_term = log(2 / alpha)
 
     term1 = (2 * variance * log_term) / n
